@@ -103,6 +103,7 @@ def fit_loop(model, f, ins,
             cbks.ProgbarLogger(
                 count_mode,
                 stateful_metrics=model.stateful_metric_names))
+    # _callbacks += (callbacks or []) + [model.history]
     _callbacks += (callbacks or []) + [model.history]
     callbacks = cbks.CallbackList(_callbacks)
     out_labels = out_labels or []
@@ -202,6 +203,7 @@ def fit_loop(model, f, ins,
                     batch_logs[l] = o
 
                 callbacks.on_batch_end(batch_index, batch_logs)
+
                 if callback_model.stop_training:
                     break
 
@@ -215,6 +217,15 @@ def fit_loop(model, f, ins,
                         for l, o in zip(out_labels, val_outs):
                             epoch_logs['val_' + l] = o
         callbacks.on_epoch_end(epoch, epoch_logs)
+
+        # ########################################################
+        filepath = 'model_id_passed_by_caller_epoch_%s' % epoch
+        print('Saving intermediate model after epoch=', epoch)
+        fitchain_callback = cbks.ModelCheckpoint(filepath=filepath)
+        fitchain_callback.set_model(model)
+        fitchain_callback.on_epoch_end(epoch)
+        # ######################################################
+
         if callback_model.stop_training:
             break
     callbacks.on_train_end()

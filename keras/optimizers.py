@@ -467,6 +467,8 @@ class Adam(Optimizer):
 
     @interfaces.legacy_get_updates_support
     def get_updates(self, loss, params):
+        print('from optimizers:get_updates()')
+        
         grads = self.get_gradients(loss, params)
         self.updates = [K.update_add(self.iterations, 1)]
 
